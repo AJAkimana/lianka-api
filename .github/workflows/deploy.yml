@@ -1,0 +1,27 @@
+name: Backend — Build & Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Pull, Build & Deploy on VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull, build, and deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.VPS_DEPLOY_PATH }}
+            git checkout main
+            git reset --hard HEAD
+            git pull origin main
+            bash deploy.sh

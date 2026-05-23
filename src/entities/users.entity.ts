@@ -17,6 +17,7 @@ import { KycDocument } from './kyc-document.entity';
 import { LedgerEntry } from './ledger.entity';
 import { LoyaltySnapshot } from './loyalty.entity';
 import { Notification } from './notification.entity';
+import { PaymentEvent } from './payment-event.entity';
 import { RankHistory } from './rank-history.entity';
 import { Referral } from './referral.entity';
 import { ReferralEarning } from './referral-earning.entity';
@@ -177,6 +178,9 @@ export class User {
 
   @OneToMany(() => LoyaltySnapshot, (snapshot) => snapshot.user)
   loyalty_snapshots: LoyaltySnapshot[];
+
+  @OneToMany(() => PaymentEvent, (event) => event.user)
+  payment_events: PaymentEvent[];
 
   @OneToMany(() => RankHistory, (history) => history.user)
   rank_history: RankHistory[];

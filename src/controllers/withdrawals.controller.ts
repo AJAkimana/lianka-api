@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { WithdrawalsService } from '../modules/withdrawals/withdrawals.service';
 import { IsString, IsNumber, IsIn, Min } from 'class-validator';
-import { IsOptional } from 'class-validator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 

@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 import { IsString, IsIn } from 'class-validator';
-import { WithdrawalAddressService } from './withdrawal-address.service';
+import { WithdrawalAddressService } from '../modules/withdrawals/withdrawal-address.service';
 
 class UpdateAddressDto {
   @IsString()
@@ -16,16 +16,16 @@ class UpdateAddressDto {
 @ApiTags('withdrawal-addresses')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('users')
+@Controller('withdrawal-addresses')
 export class WithdrawalAddressController {
   constructor(private addressService: WithdrawalAddressService) {}
 
-  @Get('withdrawal-addresses')
+  @Get('my')
   getAddresses(@Req() req) {
     return this.addressService.getAddresses(req.user.id);
   }
 
-  @Post('withdrawal-address')
+  @Post('edit')
   updateAddress(@Body() dto: UpdateAddressDto, @Req() req) {
     return this.addressService.updateAddress(
       req.user.id,

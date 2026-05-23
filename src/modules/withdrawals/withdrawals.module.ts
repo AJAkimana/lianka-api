@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Withdrawal } from '../../entities/withdrawal.entity';
+import { WithdrawalAddress } from '../../entities/withdrawal-address.entity';
 import { WithdrawalsService } from './withdrawals.service';
 import { WithdrawalsController } from '../../controllers/withdrawals.controller';
 import { UsersModule } from '../users/users.module';
@@ -9,10 +10,11 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { EmailModule } from '../email/email.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { WithdrawalAddressController } from '../../controllers/withdrawal-address.controller';
+import { WithdrawalAddressService } from './withdrawal-address.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Withdrawal]),
+    TypeOrmModule.forFeature([Withdrawal, WithdrawalAddress]),
     UsersModule,
     LedgerModule,
     NotificationsModule,
@@ -20,7 +22,7 @@ import { WithdrawalAddressController } from '../../controllers/withdrawal-addres
     LoyaltyModule,
   ],
   controllers: [WithdrawalsController, WithdrawalAddressController],
-  providers: [WithdrawalsService],
-  exports: [WithdrawalsService],
+  providers: [WithdrawalsService, WithdrawalAddressService],
+  exports: [WithdrawalsService, WithdrawalAddressService],
 })
 export class WithdrawalsModule {}

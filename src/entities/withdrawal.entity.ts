@@ -1,12 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { AdminUser } from './admin-user.entity';
+import { User } from './users.entity';
 
 @Entity('withdrawals')
 export class Withdrawal {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   user_id: string;
+
+  @ManyToOne(() => User, (user) => user.withdrawals, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @Column()
   wallet_type: string;
@@ -14,7 +27,7 @@ export class Withdrawal {
   @Column({ type: 'numeric', precision: 18, scale: 8 })
   amount: number;
 
-  @Column({ type: 'numeric', precision: 18, scale: 8, default: 2.10 })
+  @Column({ type: 'numeric', precision: 18, scale: 8, default: 2.1 })
   network_fee: number;
 
   @Column({ type: 'numeric', precision: 18, scale: 8 })
@@ -32,8 +45,14 @@ export class Withdrawal {
   @Column({ default: 'PENDING' })
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   reviewed_by: string;
+
+  @ManyToOne(() => AdminUser, (admin) => admin.reviewed_withdrawals, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'reviewed_by' })
+  reviewed_by_admin: AdminUser;
 
   @Column({ type: 'timestamptz', nullable: true })
   reviewed_at: Date;

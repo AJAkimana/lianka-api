@@ -1,17 +1,29 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from './users.entity';
 
 @Entity('ledger_entries')
 export class LedgerEntry {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   user_id: string;
+
+  @ManyToOne(() => User, (user) => user.ledger_entries, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @Column()
   reference_type: string;
 
-  @Column({ nullable: true })
+  @Column('uuid', { nullable: true })
   reference_id: string;
 
   @Column()

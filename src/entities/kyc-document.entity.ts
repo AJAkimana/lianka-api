@@ -1,12 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { AdminUser } from './admin-user.entity';
+import { User } from './users.entity';
 
 @Entity('kyc_documents')
 export class KycDocument {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   user_id: string;
+
+  @ManyToOne(() => User, (user) => user.kyc_documents, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @Column()
   document_type: string;
@@ -35,8 +48,14 @@ export class KycDocument {
   @Column({ default: 'SUBMITTED' })
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   reviewed_by: string;
+
+  @ManyToOne(() => AdminUser, (admin) => admin.reviewed_kyc_documents, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'reviewed_by' })
+  reviewed_by_admin: AdminUser;
 
   @Column({ type: 'timestamptz', nullable: true })
   reviewed_at: Date;

@@ -1,15 +1,38 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  OneToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
+import { User } from './users.entity';
+import { ReferralEarning } from './referral-earning.entity';
 
 @Entity('referrals')
 export class Referral {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   referrer_id: string;
 
-  @Column({ unique: true })
+  @ManyToOne(() => User, (user) => user.referrals_made, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'referrer_id' })
+  referrer: User;
+
+  @Column('uuid', { unique: true })
   referred_id: string;
+
+  @OneToOne(() => User, (user) => user.referral_received, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'referred_id' })
+  referred: User;
 
   @Column({ default: 'PENDING' })
   status: string;
@@ -25,4 +48,7 @@ export class Referral {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @OneToMany(() => ReferralEarning, (earning) => earning.referral)
+  earnings: ReferralEarning[];
 }

@@ -1,12 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { AdminUser } from './admin-user.entity';
+import { User } from './users.entity';
 
 @Entity('deposits')
 export class Deposit {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   user_id: string;
+
+  @ManyToOne(() => User, (user) => user.deposits, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @Column({ type: 'numeric', precision: 18, scale: 8 })
   amount: number;
@@ -23,8 +36,14 @@ export class Deposit {
   @Column({ default: 'PENDING' })
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   reviewed_by: string;
+
+  @ManyToOne(() => AdminUser, (admin) => admin.reviewed_deposits, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'reviewed_by' })
+  reviewed_by_admin: AdminUser;
 
   @Column({ type: 'timestamptz', nullable: true })
   reviewed_at: Date;

@@ -1,18 +1,45 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Referral } from './referral.entity';
+import { User } from './users.entity';
 
 @Entity('referral_earnings')
 export class ReferralEarning {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   referral_id: string;
 
-  @Column()
+  @ManyToOne(() => Referral, (referral) => referral.earnings, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'referral_id' })
+  referral: Referral;
+
+  @Column('uuid')
   referrer_id: string;
 
-  @Column()
+  @ManyToOne(() => User, (user) => user.referral_earnings_as_referrer, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'referrer_id' })
+  referrer: User;
+
+  @Column('uuid')
   referred_id: string;
+
+  @ManyToOne(() => User, (user) => user.referral_earnings_as_referred, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'referred_id' })
+  referred: User;
 
   @Column()
   earning_type: string;

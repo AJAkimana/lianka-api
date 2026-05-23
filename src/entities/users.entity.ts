@@ -5,7 +5,25 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  OneToMany,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
+import { AdminUser } from './admin-user.entity';
+import { Cycle } from './cycle.entity';
+import { Deposit } from './deposit.entity';
+import { KycDocument } from './kyc-document.entity';
+import { LedgerEntry } from './ledger.entity';
+import { LoyaltySnapshot } from './loyalty.entity';
+import { Notification } from './notification.entity';
+import { RankHistory } from './rank-history.entity';
+import { Referral } from './referral.entity';
+import { ReferralEarning } from './referral-earning.entity';
+import { RoiLog } from './roi-log.entity';
+import { Wallet } from './wallet.entity';
+import { Withdrawal } from './withdrawal.entity';
+import { WithdrawalAddress } from './withdrawal-address.entity';
 
 @Entity('users')
 export class User {
@@ -81,8 +99,14 @@ export class User {
   @Column({ nullable: true, unique: true })
   referral_code: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   referred_by: string;
+
+  @ManyToOne(() => User, (user) => user.referred_users, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'referred_by' })
+  referrer: User;
 
   // Security
   @Column({ nullable: true })
@@ -120,4 +144,55 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToOne(() => AdminUser, (adminUser) => adminUser.user)
+  admin_profile: AdminUser;
+
+  @OneToMany(() => Deposit, (deposit) => deposit.user)
+  deposits: Deposit[];
+
+  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.user)
+  withdrawals: Withdrawal[];
+
+  @OneToMany(() => Wallet, (wallet) => wallet.user)
+  wallets: Wallet[];
+
+  @OneToMany(() => LedgerEntry, (entry) => entry.user)
+  ledger_entries: LedgerEntry[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
+
+  @OneToMany(() => KycDocument, (document) => document.user)
+  kyc_documents: KycDocument[];
+
+  @OneToMany(() => WithdrawalAddress, (address) => address.user)
+  withdrawal_addresses: WithdrawalAddress[];
+
+  @OneToMany(() => Cycle, (cycle) => cycle.user)
+  cycles: Cycle[];
+
+  @OneToMany(() => RoiLog, (log) => log.user)
+  roi_logs: RoiLog[];
+
+  @OneToMany(() => LoyaltySnapshot, (snapshot) => snapshot.user)
+  loyalty_snapshots: LoyaltySnapshot[];
+
+  @OneToMany(() => RankHistory, (history) => history.user)
+  rank_history: RankHistory[];
+
+  @OneToMany(() => Referral, (referral) => referral.referrer)
+  referrals_made: Referral[];
+
+  @OneToOne(() => Referral, (referral) => referral.referred)
+  referral_received: Referral;
+
+  @OneToMany(() => ReferralEarning, (earning) => earning.referrer)
+  referral_earnings_as_referrer: ReferralEarning[];
+
+  @OneToMany(() => ReferralEarning, (earning) => earning.referred)
+  referral_earnings_as_referred: ReferralEarning[];
+
+  @OneToMany(() => User, (user) => user.referrer)
+  referred_users: User[];
 }

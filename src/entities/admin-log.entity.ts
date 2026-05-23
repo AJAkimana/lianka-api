@@ -1,12 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { AdminUser } from './admin-user.entity';
 
 @Entity('admin_logs')
 export class AdminLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   admin_id: string;
+
+  @ManyToOne(() => AdminUser, (admin) => admin.admin_logs, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'admin_id' })
+  admin: AdminUser;
 
   @Column()
   action: string;
@@ -14,7 +28,7 @@ export class AdminLog {
   @Column()
   target_type: string;
 
-  @Column({ nullable: true })
+  @Column('uuid', { nullable: true })
   target_id: string;
 
   @Column({ type: 'jsonb', nullable: true })

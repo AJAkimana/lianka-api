@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/users.entity';
+import { WithdrawalAddressService } from '../withdrawals/withdrawal-address.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private repo: Repository<User>,
+    private withdrawalAddressService: WithdrawalAddressService,
   ) {}
 
   async create(data: Partial<User>): Promise<User> {
@@ -68,7 +70,12 @@ export class UsersService {
       `SELECT * FROM user_dashboard WHERE id = $1`,
       [userId],
     );
-    return result[0] || null;
+    if (!result.length) return null;
+
+    const addresses = await this.withdrawalAddressService.getAddresses(userId);
+    const data = { ...result[0] } as any;
+    data.withdrawal_address = addresses[0]?.address || null;
+    return data || null;
   }
 
   private async generateUniqueReferralCode(): Promise<string> {

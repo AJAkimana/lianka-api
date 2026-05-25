@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Withdrawal } from '../../entities/withdrawal.entity';
 import { WithdrawalAddress } from '../../entities/withdrawal-address.entity';
@@ -15,11 +15,11 @@ import { WithdrawalAddressService } from './withdrawal-address.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Withdrawal, WithdrawalAddress]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     LedgerModule,
     NotificationsModule,
     EmailModule,
-    LoyaltyModule,
+    forwardRef(() => LoyaltyModule),
   ],
   controllers: [WithdrawalsController, WithdrawalAddressController],
   providers: [WithdrawalsService, WithdrawalAddressService],

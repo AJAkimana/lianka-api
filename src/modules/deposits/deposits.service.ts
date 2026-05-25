@@ -24,6 +24,11 @@ const DEPOSIT_ADDRESSES = {
     '0x1c9E87A2bE00A7bE0D76aEc122c2774DF996462D',
 };
 
+const TXID_VALIDATION_REGEX: Record<string, RegExp> = {
+  TRC20: /^[0-9a-fA-F]{64}$/, // Simple 64-char hex check
+  BEP20: /^0x[a-fA-F0-9]{64}$/, // 0x followed by 64 hex chars
+};
+
 const MIN_DEPOSIT = 100;
 
 @Injectable()
@@ -95,6 +100,9 @@ export class DepositsService {
       throw new BadRequestException('Invalid investment plan');
     }
 
+    if (!TXID_VALIDATION_REGEX[dto.network].test(dto.txid)) {
+      throw new BadRequestException('Invalid TXID format');
+    }
     // Duplicate TXID check — critical financial protection
     const duplicate = await this.repo.findOne({ where: { txid: dto.txid } });
     if (duplicate) {

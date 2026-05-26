@@ -11,6 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Validate required secrets
+        run: |
+          test -n "${{ secrets.VPS_HOST }}" || { echo "Missing secret: VPS_HOST"; exit 1; }
+          test -n "${{ secrets.VPS_PORT }}" || { echo "Missing secret: VPS_PORT"; exit 1; }
+          test -n "${{ secrets.VPS_USER }}" || { echo "Missing secret: VPS_USER"; exit 1; }
+          test -n "${{ secrets.VPS_SSH_KEY }}" || { echo "Missing secret: VPS_SSH_KEY"; exit 1; }
+          test -n "${{ secrets.VPS_DEPLOY_PATH }}" || { echo "Missing secret: VPS_DEPLOY_PATH"; exit 1; }
       - name: Pull, build, and deploy on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:

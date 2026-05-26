@@ -73,7 +73,7 @@ SELECT
   COALESCE(pmw.balance, 0) AS promotion_wallet_balance,
   CASE
     WHEN u.principal > 0
-    THEN ROUND((u.total_balance / (u.principal * 2)) * 100, 2)
+    THEN ROUND(((u.total_balance - u.principal) / u.principal) * 100, 2)
     ELSE 0
   END AS cycle_progress_percent,
   COALESCE(ref_counts.total_referrals, 0) AS total_referrals,

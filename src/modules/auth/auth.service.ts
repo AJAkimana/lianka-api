@@ -111,8 +111,9 @@ export class AuthService {
     }
 
     const user = await this.usersService.findByEmailVerifyToken(lookup);
-    if (!user)
+    if (!user) {
       throw new BadRequestException('Invalid or expired verification link');
+    }
 
     if (user.email_verify_expires < new Date()) {
       throw new BadRequestException(

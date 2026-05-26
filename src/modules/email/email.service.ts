@@ -10,7 +10,7 @@ export class EmailService {
   private readonly frontendUrl: string;
 
   constructor(private config: ConfigService) {
-    this.frontendUrl = config.get('FRONTEND_URL', 'https://lianka.com');
+    this.frontendUrl = config.get('FRONTEND_URL', 'https://lianka.io');
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {

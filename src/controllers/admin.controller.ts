@@ -206,6 +206,7 @@ export class AdminController {
     return this.adminService.getPendingWithdrawals();
   }
 
+  @UseGuards(AdminGuard)
   @Post('withdrawals/:id/approve')
   approveWithdrawal(
     @Param('id') id: string,

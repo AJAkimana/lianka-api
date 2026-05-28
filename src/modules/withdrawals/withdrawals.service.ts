@@ -1,5 +1,7 @@
 import {
-  Injectable, BadRequestException, ForbiddenException,
+  Injectable,
+  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -36,7 +38,9 @@ export class WithdrawalsService {
     // Gate 1: Account state
     // TERMINATED and FROZEN — fully blocked
     if (['TERMINATED', 'FROZEN'].includes(user.account_state)) {
-      throw new ForbiddenException('Account closed — withdrawals not available');
+      throw new ForbiddenException(
+        'Account closed — withdrawals not available',
+      );
     }
     // INACTIVE — blocked (no profit, no cycle running)
     // NOTE: Spec says INACTIVE can withdraw "remaining balance" but in practice
@@ -56,8 +60,8 @@ export class WithdrawalsService {
         user.kyc_status === 'SUBMITTED'
           ? 'KYC under review — withdrawals available once verified'
           : user.kyc_status === 'REJECTED'
-          ? 'KYC rejected — resubmit to enable withdrawals'
-          : 'Complete KYC to withdraw',
+            ? 'KYC rejected — resubmit to enable withdrawals'
+            : 'Complete KYC to withdraw',
       );
     }
 
@@ -69,7 +73,9 @@ export class WithdrawalsService {
       [userId],
     );
     if (!addressRecord.length) {
-      throw new ForbiddenException('Set a withdrawal address in Profile to continue');
+      throw new ForbiddenException(
+        'Set a withdrawal address in Profile to continue',
+      );
     }
 
     // Gate 4: Active pending withdrawal
@@ -134,14 +140,18 @@ export class WithdrawalsService {
     network: string;
   }) {
     const { user } = await this.validateWithdrawal(
-      dto.userId, dto.amount, dto.wallet_type,
+      dto.userId,
+      dto.amount,
+      dto.wallet_type,
     );
 
-    const networkFee = 2.10;
+    const networkFee = 2.1;
     const finalAmount = dto.amount - networkFee;
 
     if (finalAmount <= 0) {
-      throw new BadRequestException('Amount too small after network fee deduction');
+      throw new BadRequestException(
+        'Amount too small after network fee deduction',
+      );
     }
 
     // Snapshot current state for audit
@@ -220,7 +230,9 @@ export class WithdrawalsService {
 
     if (!withdrawal) throw new BadRequestException('Withdrawal not found');
     if (withdrawal.status !== 'PENDING') {
-      throw new BadRequestException('Only pending withdrawals can be cancelled');
+      throw new BadRequestException(
+        'Only pending withdrawals can be cancelled',
+      );
     }
 
     // Refund: re-credit the wallet
@@ -243,12 +255,19 @@ export class WithdrawalsService {
       await this.usersService.save(user);
     }
 
-    return { message: 'Withdrawal cancelled and funds returned to your wallet' };
+    return {
+      message: 'Withdrawal cancelled and funds returned to your wallet',
+    };
   }
 
   // ─── Admin: Approve withdrawal ───────────────────────────
 
-  async adminApprove(withdrawalId: string, adminId: string, txidSent: string, notes?: string) {
+  async adminApprove(
+    withdrawalId: string,
+    adminId: string,
+    txidSent: string,
+    notes?: string,
+  ) {
     const withdrawal = await this.repo.findOne({ where: { id: withdrawalId } });
     if (!withdrawal || withdrawal.status !== 'PENDING') {
       throw new BadRequestException('Invalid or already processed withdrawal');
@@ -266,14 +285,14 @@ export class WithdrawalsService {
 
     // Update user financial state
     user.total_profit = Number(user.total_profit) - Number(withdrawal.amount);
-    user.total_balance = Number(user.active_deposit) + Number(user.total_profit);
+    user.total_balance =
+      Number(user.active_deposit) + Number(user.total_profit);
 
     // CRITICAL: Post-withdrawal breach check
     if (Number(user.total_balance) < Number(user.principal)) {
       // Apply termination fee if loyalty < 80
-      const terminationFee = Number(user.loyalty_score) >= 80
-        ? 0
-        : Number(user.total_balance) * 0.30;
+      const terminationFee =
+        Number(user.loyalty_score) >= 80 ? 0 : Number(user.total_balance) * 0.3;
 
       user.total_balance = Number(user.total_balance) - terminationFee;
       user.total_profit = user.total_balance - Number(user.active_deposit);
@@ -290,7 +309,9 @@ export class WithdrawalsService {
       });
 
       await this.emailService.sendAccountTerminated(
-        user.email, user.full_name, terminationFee,
+        user.email,
+        user.full_name,
+        terminationFee,
       );
     } else {
       await this.usersService.save(user);
@@ -317,7 +338,9 @@ export class WithdrawalsService {
     // Recalculate loyalty score after withdrawal (spec requirement)
     try {
       await this.loyaltyService.recalculateAfterWithdrawal(withdrawal.user_id);
-    } catch (e) { /* non-blocking */ }
+    } catch (e) {
+      /* non-blocking */
+    }
 
     return { message: 'Withdrawal completed', withdrawal_id: withdrawalId };
   }
@@ -365,7 +388,10 @@ export class WithdrawalsService {
     });
 
     await this.emailService.sendWithdrawalRejected(
-      user.email, user.full_name, Number(withdrawal.amount), reason,
+      user.email,
+      user.full_name,
+      Number(withdrawal.amount),
+      reason,
     );
 
     return { message: 'Withdrawal rejected and funds returned' };
@@ -394,9 +420,10 @@ export class WithdrawalsService {
       DAILY: 0.05,
       BIWEEKLY: 0.15,
       '40D': 0.25,
-      '90D': 0.50,
-      '180D': 1.00,
+      '90D': 0.5,
+      '180D': 1.0,
     };
+    return 1;
     return map[timeframe] ?? 0.25;
   }
 

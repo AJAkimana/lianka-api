@@ -277,7 +277,7 @@ export class WithdrawalsService {
     withdrawal.reviewed_by = adminId;
     withdrawal.reviewed_at = new Date();
     withdrawal.completed_at = new Date();
-    withdrawal.txid_sent = txidSent;
+    withdrawal.txid_sent = txidSent || '';
     withdrawal.admin_notes = notes;
     await this.repo.save(withdrawal);
 

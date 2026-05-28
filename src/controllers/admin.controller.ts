@@ -31,7 +31,7 @@ class RejectDto {
 }
 
 class ApproveWithdrawalDto {
-  @IsString() txid_sent: string;
+  @IsOptional() @IsString() txid_sent?: string;
   @IsOptional() @IsString() notes?: string;
 }
 

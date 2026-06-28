@@ -15,14 +15,7 @@ import { RankService } from '../rank/rank.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { CycleService } from '../cycle/cycle.service';
 import { WalletsService } from '../wallets/wallets.service';
-
-const DEPOSIT_ADDRESSES = {
-  TRC20:
-    process.env.DEPOSIT_ADDRESS_TRC20 || 'TDFeZPisd4Rs31pkVCPGhz6QB6Y349jqHQ',
-  BEP20:
-    process.env.DEPOSIT_ADDRESS_BEP20 ||
-    '0x1c9E87A2bE00A7bE0D76aEc122c2774DF996462D',
-};
+import { ConfigService } from '@nestjs/config';
 
 const TXID_VALIDATION_REGEX: Record<string, RegExp> = {
   TRC20: /^[0-9a-fA-F]{64}$/, // Simple 64-char hex check
@@ -46,13 +39,17 @@ export class DepositsService {
     private rankService: RankService,
     private loyaltyService: LoyaltyService,
     private dataSource: DataSource,
+    private config: ConfigService,
   ) {}
 
   // ─── Get deposit addresses for user ─────────────────────
 
   getDepositInfo() {
     return {
-      addresses: DEPOSIT_ADDRESSES,
+      addresses: {
+        TRC20: this.config.get('DEPOSIT_ADDRESS_TRC20'),
+        BEP20: this.config.get('DEPOSIT_ADDRESS_BEP20'),
+      },
       min_deposit: MIN_DEPOSIT,
       currency: 'USDT',
       instructions: [

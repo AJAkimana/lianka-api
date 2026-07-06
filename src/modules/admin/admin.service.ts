@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -13,8 +8,6 @@ import { DepositsService } from '../deposits/deposits.service';
 import { WithdrawalsService } from '../withdrawals/withdrawals.service';
 import { RoiService } from '../roi/roi.service';
 import { UsersService } from '../users/users.service';
-import { LoyaltyService } from '../loyalty/loyalty.service';
-import { RankService } from '../rank/rank.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { KycService } from '../kyc/kyc.service';
 
@@ -30,8 +23,6 @@ export class AdminService {
     private kycService: KycService,
     private roiService: RoiService,
     private usersService: UsersService,
-    private loyaltyService: LoyaltyService,
-    private rankService: RankService,
     private notificationsService: NotificationsService,
     private dataSource: DataSource,
   ) {}
@@ -44,7 +35,7 @@ export class AdminService {
 
   async validateAdmin(email: string, password: string) {
     const admin = await this.findAdminByEmail(email);
-    if (!admin || !admin.is_active) return null;
+    if (!admin?.is_active) return null;
     const valid = await bcrypt.compare(password, admin.password_hash);
     return valid ? admin : null;
   }
@@ -357,7 +348,7 @@ export class AdminService {
   ) {
     await this.assertRole(adminId, ['SUPER_ADMIN', 'FINANCE_ADMIN']);
     // Credit promotion wallet
-    const result = await this.dataSource.query(
+    await this.dataSource.query(
       `UPDATE wallets SET balance = balance + $1 WHERE user_id = $2 AND wallet_type = 'promotion' RETURNING *`,
       [amount, userId],
     );

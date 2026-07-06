@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Patch,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AdminGuard } from '../modules/admin/admin.guard';
 import { AdminService } from '../modules/admin/admin.service';
@@ -86,7 +87,7 @@ export class AdminController {
       dto.email,
       dto.password,
     );
-    if (!admin) throw new Error('Invalid credentials');
+    if (!admin) throw new UnauthorizedException('Invalid credentials');
     const token = this.jwtService.sign(
       { sub: admin.id, email: admin.email, role: admin.role, is_admin: true },
       { secret: this.config.get('JWT_SECRET'), expiresIn: '8h' },
